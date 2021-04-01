@@ -6,4 +6,5 @@
         android:title="Salva nota"
         android:icon="@drawable/ic_action_salva_nota"
         app:showAsAction="always"/>
+
 </menu>

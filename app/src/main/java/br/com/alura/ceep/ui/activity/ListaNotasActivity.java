@@ -1,9 +1,18 @@
 package br.com.alura.ceep.ui.activity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
+
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
@@ -19,6 +28,73 @@ import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.CODIGO_REQUIS
 import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.CODIGO_RESULTADO_NOTA_CRIADA;
 
 public class ListaNotasActivity extends AppCompatActivity {
+    Menu optionsMenu;
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_lista, menu);
+        optionsMenu = menu;
+
+        SharedPreferences sharedPref = ListaNotasActivity.this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        int ListViewOption = sharedPref.getInt("ListViewOption", 0);
+        setListOrGrid(editor, ListViewOption);
+
+        return super.onCreateOptionsMenu(menu);
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        SharedPreferences sharedPref = ListaNotasActivity.this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        int ListViewOption = sharedPref.getInt("ListViewOption", 0);
+        setListOrGrid(editor, ListViewOption);
+
+        return super.onOptionsItemSelected(item);
+
+//        switch (item.getItemId()) {
+//            case R.id.list_ic:
+//
+//                item.setVisible(false);
+//                optionsMenu.findItem(R.id.grid_ic).setVisible(true);
+//                editor.putInt("ListViewOption", 1);
+//                editor.commit();
+//                configuraRecyclerView(ListViewOption);
+//                return true;
+//
+//            case R.id.grid_ic:
+//
+//                item.setVisible(false);
+//                optionsMenu.findItem(R.id.list_ic).setVisible(true);
+//                editor.putInt("ListViewOption", 0);
+//                editor.commit();
+//                configuraRecyclerView(ListViewOption);
+//
+//                return true;
+//
+//            default:
+//                return super.onOptionsItemSelected(item);
+//        }
+
+    }
+
+    public void setListOrGrid(SharedPreferences.Editor editor, int listViewOption) {
+        if (listViewOption == 0) {
+            optionsMenu.findItem(R.id.list_ic).setVisible(false);
+            optionsMenu.findItem(R.id.grid_ic).setVisible(true);
+            editor.putInt("ListViewOption", 1);
+            editor.commit();
+            configuraRecyclerView(listViewOption);
+        } else {
+            optionsMenu.findItem(R.id.grid_ic).setVisible(false);
+            optionsMenu.findItem(R.id.list_ic).setVisible(true);
+            editor.putInt("ListViewOption", 0);
+            editor.commit();
+            configuraRecyclerView(listViewOption);
+        }
+    }
 
     private ListaNotasAdapter adapter;
 
@@ -27,9 +103,12 @@ public class ListaNotasActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_notas);
 
-        List<Nota> todasNotas = pegaTodasNotas();
-        configuraRecyclerView(todasNotas);
+        SharedPreferences sharedPref = ListaNotasActivity.this.getPreferences(Context.MODE_PRIVATE);
+        int ListViewOption = sharedPref.getInt("ListViewOption", 0);
+
+        configuraRecyclerView(ListViewOption);
         configuraBotaoInsereNota();
+
     }
 
     private void configuraBotaoInsereNota() {
@@ -58,7 +137,7 @@ public class ListaNotasActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(ehResultadoComNota(requestCode, resultCode, data)){
+        if (ehResultadoComNota(requestCode, resultCode, data)) {
             Nota notaRecebida = (Nota) data.getSerializableExtra(CHAVE_NOTA);
             adiciona(notaRecebida);
         }
@@ -87,8 +166,19 @@ public class ListaNotasActivity extends AppCompatActivity {
         return requestCode == CODIGO_REQUISICAO_INSERE_NOTA;
     }
 
-    private void configuraRecyclerView(List<Nota> todasNotas) {
+    private void configuraRecyclerView(int listViewOption) {
         RecyclerView listaNotas = findViewById(R.id.lista_notas_recyclerview);
+        List<Nota> todasNotas = pegaTodasNotas();
+        StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(2, LinearLayoutManager.VERTICAL);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+
+        if (listViewOption == 0) {
+            listaNotas.setLayoutManager(linearLayoutManager);
+        } else {
+
+            listaNotas.setLayoutManager(staggeredGridLayoutManager); // set LayoutManager to RecyclerView
+        }
+
         configuraAdapter(todasNotas, listaNotas);
     }
 
