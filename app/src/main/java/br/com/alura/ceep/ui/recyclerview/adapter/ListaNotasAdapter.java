@@ -13,16 +13,17 @@ import android.widget.TextView;
 import java.util.List;
 
 import br.com.alura.ceep.R;
+import br.com.alura.ceep.database.CeepDatabase;
 import br.com.alura.ceep.model.Nota;
 
 public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.NotaViewHolder> {
 
-    private final List<Nota> notas;
     private final Context context;
+    CeepDatabase db;
 
-    public ListaNotasAdapter(Context context, List<Nota> notas){
+    public ListaNotasAdapter(Context context, CeepDatabase db) {
         this.context = context;
-        this.notas = notas;
+        this.db = db;
     }
 
     @Override
@@ -34,13 +35,15 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
 
     @Override
     public void onBindViewHolder(ListaNotasAdapter.NotaViewHolder holder, int position) {
-        Nota nota = notas.get(position);
+        Nota nota = db.notaDao().getAll().get(position);
+        //  Nota nota = notas.get(position);
         holder.vincula(nota);
     }
 
     @Override
     public int getItemCount() {
-        return notas.size();
+        return db.notaDao().getAll().size();
+        //return notas.size();
     }
 
     class NotaViewHolder extends RecyclerView.ViewHolder {
@@ -56,19 +59,19 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
             constraintLayout = itemView.findViewById(R.id.item_nota_id);
         }
 
-        public void vincula(Nota nota){
+        public void vincula(Nota nota) {
             preencheCampo(nota);
         }
 
         private void preencheCampo(Nota nota) {
-            titulo.setText(nota.getTitulo());
-            descricao.setText(nota.getDescricao());
-            constraintLayout.setBackgroundColor(nota.getColor());
+            titulo.setText(nota.titulo);
+            descricao.setText(nota.descricao);
+            constraintLayout.setBackgroundColor(nota.color);
         }
     }
 
-    public void adiciona(Nota nota){
-        notas.add(nota);
+    public void adiciona(Nota nota) {
+        //notas.add(nota);
         notifyDataSetChanged();
     }
 

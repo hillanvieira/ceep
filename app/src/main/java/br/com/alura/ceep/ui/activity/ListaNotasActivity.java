@@ -10,7 +10,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
+import androidx.room.Room;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,7 +21,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import br.com.alura.ceep.R;
-import br.com.alura.ceep.dao.NotaDAO;
+import br.com.alura.ceep.database.CeepDatabase;
 import br.com.alura.ceep.model.Nota;
 import br.com.alura.ceep.ui.recyclerview.adapter.ListaNotasAdapter;
 
@@ -30,6 +32,7 @@ import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.CODIGO_RESULT
 public class ListaNotasActivity extends AppCompatActivity {
     Menu optionsMenu;
     private ListaNotasAdapter adapter;
+    private CeepDatabase db;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -105,6 +108,9 @@ public class ListaNotasActivity extends AppCompatActivity {
         SharedPreferences sharedPref = ListaNotasActivity.this.getPreferences(Context.MODE_PRIVATE);
         int ListViewOption = sharedPref.getInt("ListViewOption", 0);
 
+        db = Room.databaseBuilder(getApplicationContext(),
+                CeepDatabase.class, "database-ceep").allowMainThreadQueries().build();
+
         configuraRecyclerView(ListViewOption);
         configuraBotaoInsereNota();
 
@@ -128,11 +134,6 @@ public class ListaNotasActivity extends AppCompatActivity {
                 CODIGO_REQUISICAO_INSERE_NOTA);
     }
 
-    private List<Nota> pegaTodasNotas() {
-        NotaDAO dao = new NotaDAO();
-        return dao.todos();
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -143,7 +144,13 @@ public class ListaNotasActivity extends AppCompatActivity {
     }
 
     private void adiciona(Nota nota) {
-        new NotaDAO().insere(nota);
+
+        try {
+            db.notaDao().insertAll(nota);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         adapter.adiciona(nota);
     }
 
@@ -167,7 +174,6 @@ public class ListaNotasActivity extends AppCompatActivity {
 
     private void configuraRecyclerView(int listViewOption) {
         RecyclerView listaNotas = findViewById(R.id.lista_notas_recyclerview);
-        List<Nota> todasNotas = pegaTodasNotas();
         StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(2, LinearLayoutManager.VERTICAL);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
 
@@ -177,11 +183,11 @@ public class ListaNotasActivity extends AppCompatActivity {
             listaNotas.setLayoutManager(staggeredGridLayoutManager); // set LayoutManager to RecyclerView
         }
 
-        configuraAdapter(todasNotas, listaNotas);
+        configuraAdapter(listaNotas);
     }
 
-    private void configuraAdapter(List<Nota> todasNotas, RecyclerView listaNotas) {
-        adapter = new ListaNotasAdapter(this, todasNotas);
+    private void configuraAdapter(RecyclerView listaNotas) {
+        adapter = new ListaNotasAdapter(this,db);
         listaNotas.setAdapter(adapter);
     }
 

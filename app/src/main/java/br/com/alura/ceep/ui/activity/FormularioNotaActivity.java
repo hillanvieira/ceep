@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,9 +12,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import br.com.alura.ceep.R;
+import br.com.alura.ceep.database.CeepDatabase;
 import br.com.alura.ceep.model.CoresEnum;
 import br.com.alura.ceep.model.Nota;
 import br.com.alura.ceep.ui.recyclerview.adapter.PicColorAdapter;
@@ -53,7 +54,7 @@ public class FormularioNotaActivity extends AppCompatActivity implements PicColo
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
-        Log.i("BGCOLOR", ""+backGroundColor);
+        Log.i("BGCOLOR", "" + backGroundColor);
         outState.putInt(STATE_BACKGROUND, backGroundColor);
         super.onSaveInstanceState(outState);
     }
