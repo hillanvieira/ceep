@@ -1,8 +1,6 @@
 package br.com.alura.ceep.ui.recyclerview.adapter;
 
 import android.content.Context;
-import android.os.Build;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,14 +18,16 @@ import br.com.alura.ceep.model.CoresEnum;
 
 public class PicColorAdapter extends RecyclerView.Adapter<PicColorAdapter.PicColorViewHolder> {
 
-    private List<CoresEnum> colors = new ArrayList<>();
-    private Context context;
+    private final List<CoresEnum> colors = new ArrayList<>();
+    private final Context context;
+
+
+    //CallBack clickEvent
     private OnItemClicked onClick;
 
     public interface OnItemClicked {
         void onItemClick(int position);
     }
-
 
     public PicColorAdapter(Context context) {
         this.context = context;
@@ -37,8 +37,7 @@ public class PicColorAdapter extends RecyclerView.Adapter<PicColorAdapter.PicCol
     @NonNull
     @Override
     public PicColorAdapter.PicColorViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context)
-                .inflate(R.layout.circle_pic_color, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.circle_pic_color, parent, false);
         return new PicColorViewHolder(view);
     }
 
@@ -57,13 +56,12 @@ public class PicColorAdapter extends RecyclerView.Adapter<PicColorAdapter.PicCol
 
     @Override
     public int getItemCount() {
-
         return colors.size();
     }
 
     public class PicColorViewHolder extends RecyclerView.ViewHolder {
 
-        private ImageView imageView;
+        private final ImageView imageView;
 
         public PicColorViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -71,7 +69,7 @@ public class PicColorAdapter extends RecyclerView.Adapter<PicColorAdapter.PicCol
         }
 
         public void setColorsOnView(CoresEnum coresEnum) {
-            Log.i("COR", "" + coresEnum);
+            // Log.i("COR", "" + coresEnum);
             imageView.setColorFilter(cor(coresEnum));
         }
     }
@@ -99,7 +97,7 @@ public class PicColorAdapter extends RecyclerView.Adapter<PicColorAdapter.PicCol
             case ROXO:
                 return 0xFFBE29EC;
             default:
-                return 0;
+                return 0xFFFFFFFF;
         }
     }
 

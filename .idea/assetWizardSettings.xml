@@ -112,6 +112,7 @@
                                             <option name="values">
                                               <map>
                                                 <entry key="color" value="000000" />
+                                                <entry key="imagePath" value="C:\Users\WORKSHOP\Desktop\formacao-android-feature-3-resources\ceep-icon-android.png" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -307,11 +308,6 @@
                                 </PersistentState>
                               </value>
                             </entry>
-                          </map>
-                        </option>
-                        <option name="values">
-                          <map>
-                            <entry key="outputIconType" value="ACTIONBAR" />
                           </map>
                         </option>
                       </PersistentState>
