@@ -29,6 +29,7 @@ import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.CODIGO_RESULT
 
 public class ListaNotasActivity extends AppCompatActivity {
     Menu optionsMenu;
+    private ListaNotasAdapter adapter;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -95,8 +96,6 @@ public class ListaNotasActivity extends AppCompatActivity {
             configuraRecyclerView(listViewOption);
         }
     }
-
-    private ListaNotasAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -175,7 +174,6 @@ public class ListaNotasActivity extends AppCompatActivity {
         if (listViewOption == 0) {
             listaNotas.setLayoutManager(linearLayoutManager);
         } else {
-
             listaNotas.setLayoutManager(staggeredGridLayoutManager); // set LayoutManager to RecyclerView
         }
 

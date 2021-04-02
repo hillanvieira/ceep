@@ -1,6 +1,8 @@
 package br.com.alura.ceep.ui.recyclerview.adapter;
 
 import android.content.Context;
+
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
@@ -45,11 +47,13 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
 
         private final TextView titulo;
         private final TextView descricao;
+        private final ConstraintLayout constraintLayout;
 
         public NotaViewHolder(View itemView) {
             super(itemView);
             titulo = itemView.findViewById(R.id.item_nota_titulo);
             descricao = itemView.findViewById(R.id.item_nota_descricao);
+            constraintLayout = itemView.findViewById(R.id.item_nota_id);
         }
 
         public void vincula(Nota nota){
@@ -59,6 +63,7 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
         private void preencheCampo(Nota nota) {
             titulo.setText(nota.getTitulo());
             descricao.setText(nota.getDescricao());
+            constraintLayout.setBackgroundColor(nota.getColor());
         }
     }
 

@@ -2,24 +2,41 @@ package br.com.alura.ceep.ui.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import br.com.alura.ceep.R;
+import br.com.alura.ceep.model.CoresEnum;
 import br.com.alura.ceep.model.Nota;
+import br.com.alura.ceep.ui.recyclerview.adapter.PicColorAdapter;
 
 import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.CHAVE_NOTA;
 import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.CODIGO_RESULTADO_NOTA_CRIADA;
 
-public class FormularioNotaActivity extends AppCompatActivity {
+public class FormularioNotaActivity extends AppCompatActivity implements PicColorAdapter.OnItemClicked {
+
+    private PicColorAdapter adapter;
+    private ConstraintLayout constraintLayout;
+    private int backGroundColor = 0xFFFFFFFF;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_formulario_nota);
+
+        constraintLayout = findViewById(R.id.activity_formulario_nota_id);
+        RecyclerView listPicColor = findViewById(R.id.color_select_recyclerview);
+
+        adapter = new PicColorAdapter(this);
+        listPicColor.setAdapter(adapter);
+        adapter.setOnClick(this);
+
     }
 
     @Override
@@ -44,15 +61,26 @@ public class FormularioNotaActivity extends AppCompatActivity {
         setResult(CODIGO_RESULTADO_NOTA_CRIADA,resultadoInsercao);
     }
 
-    @NonNull
     private Nota criaNota() {
         EditText titulo = findViewById(R.id.formulario_nota_titulo);
         EditText descricao = findViewById(R.id.formulario_nota_descricao);
         return new Nota(titulo.getText().toString(),
-                descricao.getText().toString());
+                descricao.getText().toString(),backGroundColor);
     }
 
     private boolean ehMenuSalvaNota(MenuItem item) {
         return item.getItemId() == R.id.menu_formulario_nota_ic_salva;
+    }
+
+    @Override
+    public void onItemClick(int position) {
+
+        backGroundColor = adapter.cor(CoresEnum.values()[position]);
+        constraintLayout.setBackgroundColor(backGroundColor);
+
+        /*String text = CoresEnum.values()[position].name();
+        Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
+        toast.show();*/
+
     }
 }
