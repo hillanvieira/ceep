@@ -1,5 +1,6 @@
 package br.com.alura.ceep.ui.activity;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -7,84 +8,64 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.room.Room;
 
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import java.util.List;
-
 import br.com.alura.ceep.R;
 import br.com.alura.ceep.database.CeepDatabase;
 import br.com.alura.ceep.model.Nota;
 import br.com.alura.ceep.ui.recyclerview.adapter.ListaNotasAdapter;
+import br.com.alura.ceep.ui.recyclerview.adapter.listener.OnItemClickListener;
+import br.com.alura.ceep.ui.recyclerview.helper.callback.NotaItemTouchHelperCallback;
 
 import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.CHAVE_NOTA;
+import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.CHAVE_POSICAO;
+import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.CODIGO_REQUISICAO_ALTERA_NOTA;
 import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.CODIGO_REQUISICAO_INSERE_NOTA;
-import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.CODIGO_RESULTADO_NOTA_CRIADA;
+import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.POSICAO_INVALIDA;
 
 public class ListaNotasActivity extends AppCompatActivity {
-    Menu optionsMenu;
+    private Menu optionsMenu;
     private ListaNotasAdapter adapter;
     private CeepDatabase db;
+    private int listViewOption;
+    private SharedPreferences sharedPref;
+
+    public static final String TITULO_APPBAR = "Notas";
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_lista, menu);
         optionsMenu = menu;
-
-        SharedPreferences sharedPref = ListaNotasActivity.this.getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        int ListViewOption = sharedPref.getInt("ListViewOption", 0);
-        setListOrGrid(editor, ListViewOption);
-
+        setListOrGrid();
         return super.onCreateOptionsMenu(menu);
-
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-
-        SharedPreferences sharedPref = ListaNotasActivity.this.getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        int ListViewOption = sharedPref.getInt("ListViewOption", 0);
-        setListOrGrid(editor, ListViewOption);
-
+        listViewOption = sharedPref.getInt("ListViewOption", 0);
+        setListOrGrid();
         return super.onOptionsItemSelected(item);
-
 //        switch (item.getItemId()) {
 //            case R.id.list_ic:
-//
-//                item.setVisible(false);
-//                optionsMenu.findItem(R.id.grid_ic).setVisible(true);
-//                editor.putInt("ListViewOption", 1);
-//                editor.commit();
-//                configuraRecyclerView(ListViewOption);
-//                return true;
-//
+//              break;
 //            case R.id.grid_ic:
-//
-//                item.setVisible(false);
-//                optionsMenu.findItem(R.id.list_ic).setVisible(true);
-//                editor.putInt("ListViewOption", 0);
-//                editor.commit();
-//                configuraRecyclerView(ListViewOption);
-//
-//                return true;
-//
-//            default:
-//                return super.onOptionsItemSelected(item);
+//              break;
 //        }
-
     }
 
-    public void setListOrGrid(SharedPreferences.Editor editor, int listViewOption) {
+    public void setListOrGrid() {
+
+        SharedPreferences.Editor editor = sharedPref.edit();
+
         if (listViewOption == 0) {
             optionsMenu.findItem(R.id.list_ic).setVisible(false);
             optionsMenu.findItem(R.id.grid_ic).setVisible(true);
@@ -105,13 +86,15 @@ public class ListaNotasActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_notas);
 
-        SharedPreferences sharedPref = ListaNotasActivity.this.getPreferences(Context.MODE_PRIVATE);
-        int ListViewOption = sharedPref.getInt("ListViewOption", 0);
+        setTitle(TITULO_APPBAR);
+
+        sharedPref = ListaNotasActivity.this.getPreferences(Context.MODE_PRIVATE);
+        listViewOption = sharedPref.getInt("ListViewOption", 0);
 
         db = Room.databaseBuilder(getApplicationContext(),
                 CeepDatabase.class, "database-ceep").allowMainThreadQueries().build();
 
-        configuraRecyclerView(ListViewOption);
+        configuraRecyclerView(listViewOption);
         configuraBotaoInsereNota();
 
     }
@@ -121,12 +104,12 @@ public class ListaNotasActivity extends AppCompatActivity {
         botaoInsereNota.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                vaiParaFormularioNotaActivity();
+                vaiParaFormularioNotaActivityInsere();
             }
         });
     }
 
-    private void vaiParaFormularioNotaActivity() {
+    private void vaiParaFormularioNotaActivityInsere() {
         Intent iniciaFormularioNota =
                 new Intent(ListaNotasActivity.this,
                         FormularioNotaActivity.class);
@@ -134,38 +117,71 @@ public class ListaNotasActivity extends AppCompatActivity {
                 CODIGO_REQUISICAO_INSERE_NOTA);
     }
 
+    private void vaiParaFormularioNotaActivityAltera(Nota nota, int posicao) {
+        Intent abreFormularioComNota = new Intent(ListaNotasActivity.this,
+                FormularioNotaActivity.class);
+        abreFormularioComNota.putExtra(CHAVE_NOTA, nota);
+        abreFormularioComNota.putExtra(CHAVE_POSICAO, posicao);
+        startActivityForResult(abreFormularioComNota, CODIGO_REQUISICAO_ALTERA_NOTA);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (ehResultadoComNota(requestCode, resultCode, data)) {
-            Nota notaRecebida = (Nota) data.getSerializableExtra(CHAVE_NOTA);
-            adiciona(notaRecebida);
+        if (ehResultadoInsereNota(requestCode, data)) {
+
+            if (resultadoOk(resultCode)) {
+                Nota notaRecebida = (Nota) data.getSerializableExtra(CHAVE_NOTA);
+                adiciona(notaRecebida);
+            }
+
+        }
+
+        if (ehResultadoAlteraNota(requestCode, data)) {
+            if (resultadoOk(resultCode)) {
+                Nota notaRecebida = (Nota) data.getSerializableExtra(CHAVE_NOTA);
+                int posicaoRecebida = data.getIntExtra(CHAVE_POSICAO, POSICAO_INVALIDA);
+                if (ehPosicaoValida(posicaoRecebida)) {
+                    altera(notaRecebida, posicaoRecebida);
+                }
+            }
         }
     }
 
-    private void adiciona(Nota nota) {
-
-        try {
-            db.notaDao().insertAll(nota);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        adapter.adiciona(nota);
+    private void altera(Nota nota, int posicao) {
+        //new NotaDAO().altera(posicao, nota);
+        adapter.altera(posicao, nota);
     }
 
-    private boolean ehResultadoComNota(int requestCode, int resultCode, Intent data) {
+    private boolean ehPosicaoValida(int posicaoRecebida) {
+        return posicaoRecebida > POSICAO_INVALIDA;
+    }
+
+    private boolean ehResultadoInsereNota(int requestCode, Intent data) {
         return ehCodigoRequisicaoInsereNota(requestCode) &&
-                ehCodigoResultadoNotaCriada(resultCode) &&
                 temNota(data);
     }
 
-    private boolean temNota(Intent data) {
-        return data.hasExtra(CHAVE_NOTA);
+    private boolean resultadoOk(int resultCode) {
+        return resultCode == Activity.RESULT_OK;
     }
 
-    private boolean ehCodigoResultadoNotaCriada(int resultCode) {
-        return resultCode == CODIGO_RESULTADO_NOTA_CRIADA;
+
+    private boolean ehResultadoAlteraNota(int requestCode, Intent data) {
+        return ehCodigoRequisicaoAlteraNota(requestCode) &&
+                temNota(data);
+    }
+
+    private boolean ehCodigoRequisicaoAlteraNota(int requestCode) {
+        return requestCode == CODIGO_REQUISICAO_ALTERA_NOTA;
+    }
+
+    private void adiciona(Nota nota) {
+        adapter.adiciona(nota);
+    }
+
+    private boolean temNota(Intent data) {
+        return data != null && data.hasExtra(CHAVE_NOTA);
     }
 
     private boolean ehCodigoRequisicaoInsereNota(int requestCode) {
@@ -184,11 +200,25 @@ public class ListaNotasActivity extends AppCompatActivity {
         }
 
         configuraAdapter(listaNotas);
+        configuraItemTouchHelper(listaNotas);
+    }
+
+    private void configuraItemTouchHelper(RecyclerView listaNotas) {
+        ItemTouchHelper itemTouchHelper =
+                new ItemTouchHelper(new NotaItemTouchHelperCallback(adapter));
+        itemTouchHelper.attachToRecyclerView(listaNotas);
     }
 
     private void configuraAdapter(RecyclerView listaNotas) {
-        adapter = new ListaNotasAdapter(this,db);
+        adapter = new ListaNotasAdapter(this, db);
         listaNotas.setAdapter(adapter);
+        adapter.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(int posicao) {
+                Nota nota = db.notaDao().getAll().get(posicao);
+                vaiParaFormularioNotaActivityAltera(nota, posicao);
+            }
+        });
     }
 
 }

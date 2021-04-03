@@ -15,19 +15,15 @@ import java.util.List;
 
 import br.com.alura.ceep.R;
 import br.com.alura.ceep.model.CoresEnum;
+import br.com.alura.ceep.ui.recyclerview.adapter.listener.OnItemClickListener;
 
 public class PicColorAdapter extends RecyclerView.Adapter<PicColorAdapter.PicColorViewHolder> {
 
     private final List<CoresEnum> colors = new ArrayList<>();
     private final Context context;
 
-
     //CallBack clickEvent
-    private OnItemClicked onClick;
-
-    public interface OnItemClicked {
-        void onItemClick(int position);
-    }
+    private OnItemClickListener onClick;
 
     public PicColorAdapter(Context context) {
         this.context = context;
@@ -44,8 +40,8 @@ public class PicColorAdapter extends RecyclerView.Adapter<PicColorAdapter.PicCol
 
     @Override
     public void onBindViewHolder(@NonNull PicColorAdapter.PicColorViewHolder holder, final int position) {
-        holder.setColorsOnView(colors.get(position));
 
+        holder.setColorsOnView(colors.get(position));
         holder.imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -69,7 +65,6 @@ public class PicColorAdapter extends RecyclerView.Adapter<PicColorAdapter.PicCol
         }
 
         public void setColorsOnView(CoresEnum coresEnum) {
-            // Log.i("COR", "" + coresEnum);
             imageView.setColorFilter(cor(coresEnum));
         }
     }
@@ -102,7 +97,7 @@ public class PicColorAdapter extends RecyclerView.Adapter<PicColorAdapter.PicCol
     }
 
 
-    public void setOnClick(OnItemClicked onClick) {
+    public void setOnClick(OnItemClickListener onClick) {
         this.onClick = onClick;
     }
 

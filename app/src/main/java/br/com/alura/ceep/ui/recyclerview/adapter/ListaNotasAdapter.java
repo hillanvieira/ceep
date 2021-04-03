@@ -10,20 +10,29 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.Collections;
 import java.util.List;
 
 import br.com.alura.ceep.R;
 import br.com.alura.ceep.database.CeepDatabase;
 import br.com.alura.ceep.model.Nota;
+import br.com.alura.ceep.ui.recyclerview.adapter.listener.OnItemClickListener;
 
 public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.NotaViewHolder> {
 
     private final Context context;
-    CeepDatabase db;
+    private CeepDatabase db;
+    private OnItemClickListener onItemClickListener;
+    private List<Nota> notas;
 
     public ListaNotasAdapter(Context context, CeepDatabase db) {
         this.context = context;
         this.db = db;
+        this.notas = db.notaDao().getAll();
+    }
+
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
     }
 
     @Override
@@ -35,15 +44,28 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
 
     @Override
     public void onBindViewHolder(ListaNotasAdapter.NotaViewHolder holder, int position) {
-        Nota nota = db.notaDao().getAll().get(position);
-        //  Nota nota = notas.get(position);
+        Nota nota = notas.get(position);
         holder.vincula(nota);
     }
 
     @Override
     public int getItemCount() {
-        return db.notaDao().getAll().size();
-        //return notas.size();
+        return notas.size();
+    }
+
+    public void altera(int posicao, Nota nota) {
+        notas.set(posicao, nota);
+        notifyDataSetChanged();
+    }
+
+    public void remove(int posicao) {
+        notas.remove(posicao);
+        notifyItemRemoved(posicao);
+    }
+
+    public void troca(int posicaoInicial, int posicaoFinal) {
+        Collections.swap(notas, posicaoInicial, posicaoFinal);
+        notifyItemMoved(posicaoInicial, posicaoFinal);
     }
 
     class NotaViewHolder extends RecyclerView.ViewHolder {
@@ -57,6 +79,13 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
             titulo = itemView.findViewById(R.id.item_nota_titulo);
             descricao = itemView.findViewById(R.id.item_nota_descricao);
             constraintLayout = itemView.findViewById(R.id.item_nota_id);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onItemClickListener.onItemClick(getAdapterPosition());
+                }
+            });
         }
 
         public void vincula(Nota nota) {
@@ -71,7 +100,11 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
     }
 
     public void adiciona(Nota nota) {
-        //notas.add(nota);
+        try {
+            db.notaDao().insertAll(nota);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         notifyDataSetChanged();
     }
 

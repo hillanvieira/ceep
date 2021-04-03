@@ -1,7 +1,5 @@
 package br.com.alura.ceep.model;
 
-import android.graphics.Color;
-
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
@@ -24,17 +22,14 @@ public class Nota implements Serializable {
     @ColumnInfo(name = "color")
     public final int color;
 
-    public Nota(String titulo, String descricao, int color) {
+    @ColumnInfo(name = "position")
+    public final int position;
+
+    public Nota(String titulo, String descricao, int color, int position) {
         this.titulo = titulo;
         this.descricao = descricao;
         this.color = color;
-    }
-
-    @Ignore
-    public Nota(String titulo, String descricao) {
-        this.titulo = titulo;
-        this.descricao = descricao;
-        this.color = 0xFFFFFFFF;
+        this.position = position;
     }
 
 }

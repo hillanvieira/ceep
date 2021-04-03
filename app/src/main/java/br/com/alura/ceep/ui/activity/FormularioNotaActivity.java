@@ -4,8 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.room.Room;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,42 +14,76 @@ import android.view.MenuItem;
 import android.widget.EditText;
 
 import br.com.alura.ceep.R;
-import br.com.alura.ceep.database.CeepDatabase;
 import br.com.alura.ceep.model.CoresEnum;
 import br.com.alura.ceep.model.Nota;
 import br.com.alura.ceep.ui.recyclerview.adapter.PicColorAdapter;
+import br.com.alura.ceep.ui.recyclerview.adapter.listener.OnItemClickListener;
 
 import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.CHAVE_NOTA;
-import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.CODIGO_RESULTADO_NOTA_CRIADA;
+import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.CHAVE_POSICAO;
+import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.POSICAO_INVALIDA;
 
-public class FormularioNotaActivity extends AppCompatActivity implements PicColorAdapter.OnItemClicked {
 
+public class FormularioNotaActivity extends AppCompatActivity implements OnItemClickListener {
+
+
+    static final String STATE_BACKGROUND = "Background color";
+    public static final String TITULO_APPBAR_INSERE = "Insere nota";
+    public static final String TITULO_APPBAR_ALTERA = "Altera nota";
+    private int posicaoRecibida = POSICAO_INVALIDA;
+    RecyclerView listPicColor;
+    private EditText titulo;
+    private EditText descricao;
     private PicColorAdapter adapter;
     private ConstraintLayout constraintLayout;
     private int backGroundColor;
-    static final String STATE_BACKGROUND = "Background color";
+    private int uid;
+    private int position;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_formulario_nota);
-        constraintLayout = findViewById(R.id.activity_formulario_nota_id);
-        RecyclerView listPicColor = findViewById(R.id.color_select_recyclerview);
+
+        setTitle(TITULO_APPBAR_INSERE);
+        inicializaCampos();
 
         if (savedInstanceState != null) {
             // Restore value of members from saved state
-            //Log.i("State", ""+savedInstanceState.getInt(STATE_BACKGROUND));
             backGroundColor = savedInstanceState.getInt(STATE_BACKGROUND);
+            constraintLayout.setBackgroundColor(backGroundColor);
         } else {
             constraintLayout.setBackgroundColor(0xFFFFFFFF);
             // Probably initialize members with default values for a new instance
         }
 
-        constraintLayout.setBackgroundColor(backGroundColor);
+        Intent dadosRecebidos = getIntent();
+        if(dadosRecebidos.hasExtra(CHAVE_NOTA)){
+            setTitle(TITULO_APPBAR_ALTERA);
+            Nota notaRecebida = (Nota) dadosRecebidos
+                    .getSerializableExtra(CHAVE_NOTA);
+            posicaoRecibida = dadosRecebidos.getIntExtra(CHAVE_POSICAO, POSICAO_INVALIDA);
+            preencheCampos(notaRecebida);
+        }
+
         adapter = new PicColorAdapter(this);
         listPicColor.setAdapter(adapter);
         adapter.setOnClick(this);
 
+    }
+
+    private void inicializaCampos() {
+        constraintLayout = findViewById(R.id.activity_formulario_nota_id);
+        titulo = findViewById(R.id.formulario_nota_titulo);
+        descricao = findViewById(R.id.formulario_nota_descricao);
+        listPicColor = findViewById(R.id.color_select_recyclerview);
+
+    }
+
+    private void preencheCampos(Nota notaRecebida) {
+       titulo.setText(notaRecebida.titulo);
+       descricao.setText(notaRecebida.descricao);
     }
 
     @Override
@@ -78,14 +112,13 @@ public class FormularioNotaActivity extends AppCompatActivity implements PicColo
     private void retornaNota(Nota nota) {
         Intent resultadoInsercao = new Intent();
         resultadoInsercao.putExtra(CHAVE_NOTA, nota);
-        setResult(CODIGO_RESULTADO_NOTA_CRIADA, resultadoInsercao);
+        resultadoInsercao.putExtra(CHAVE_POSICAO, posicaoRecibida);
+        setResult(Activity.RESULT_OK,resultadoInsercao);
     }
 
     private Nota criaNota() {
-        EditText titulo = findViewById(R.id.formulario_nota_titulo);
-        EditText descricao = findViewById(R.id.formulario_nota_descricao);
         return new Nota(titulo.getText().toString(),
-                descricao.getText().toString(), backGroundColor);
+                descricao.getText().toString(), backGroundColor, 0);
     }
 
     private boolean ehMenuSalvaNota(MenuItem item) {
@@ -94,12 +127,9 @@ public class FormularioNotaActivity extends AppCompatActivity implements PicColo
 
     @Override
     public void onItemClick(int position) {
-
         backGroundColor = adapter.cor(CoresEnum.values()[position]);
         constraintLayout.setBackgroundColor(backGroundColor);
-
-//        Toast toast = Toast.makeText(this, CoresEnum.values()[position].name(), Toast.LENGTH_SHORT);
-//        toast.show();
-
     }
+
+
 }
