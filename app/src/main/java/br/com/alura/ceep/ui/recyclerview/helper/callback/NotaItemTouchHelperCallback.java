@@ -58,7 +58,7 @@ public class NotaItemTouchHelperCallback extends ItemTouchHelper.Callback {
         removeNota(posicaoDaNotaDeslizada);
     }
 
-   private void removeNota(int posicao) {
-       adapter.remove(posicao);
+   private void removeNota(int position) {
+       adapter.remove(position);
     }
 }

@@ -27,6 +27,10 @@ public interface NotaDao {
     @Query("SELECT * FROM nota WHERE position LIKE :first LIMIT 1")
     Nota findByPosition(int first);
 
+    @Query("DELETE FROM nota WHERE position LIKE :first")
+    void deleteByPosition(int first);
+
+
 
     @Update
     void update(Nota... notas);

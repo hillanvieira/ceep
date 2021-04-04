@@ -90,18 +90,31 @@ public class ListaNotasActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = sharedPref.edit();
 
         if (listViewOption == 0) {
-            optionsMenu.findItem(R.id.list_ic).setVisible(true);
-            optionsMenu.findItem(R.id.grid_ic).setVisible(false);
+//            optionsMenu.findItem(R.id.list_ic).setVisible(true);
+//            optionsMenu.findItem(R.id.grid_ic).setVisible(false);
             editor.putInt("ListViewOption", 1);
+            editor.commit();
+
+            Intent intent = getIntent();
+            finish();
+            startActivity(intent);
+
         } else if (listViewOption == 1) {
-            optionsMenu.findItem(R.id.grid_ic).setVisible(true);
-            optionsMenu.findItem(R.id.list_ic).setVisible(false);
+//            optionsMenu.findItem(R.id.grid_ic).setVisible(true);
+//            optionsMenu.findItem(R.id.list_ic).setVisible(false);
+
             editor.putInt("ListViewOption", 0);
+            editor.commit();
+
+            Intent intent = getIntent();
+            finish();
+            startActivity(intent);
+
         }
 
-        editor.commit();
-        listViewOption = sharedPref.getInt("ListViewOption", 0);
-        configuraRecyclerView(listViewOption);
+//        editor.commit();
+//        listViewOption = sharedPref.getInt("ListViewOption", 0);
+//        configuraRecyclerView(listViewOption);
     }
 
     private void menuItemInit() {
@@ -157,14 +170,13 @@ public class ListaNotasActivity extends AppCompatActivity {
         if (ehResultadoAlteraNota(requestCode, data)) {
             if (resultadoOk(resultCode)) {
                 Nota notaRecebida = (Nota) data.getSerializableExtra(CHAVE_NOTA);
-                int posicaoRecebida = data.getIntExtra(CHAVE_POSICAO, POSICAO_INVALIDA);
-                    altera(notaRecebida, posicaoRecebida);
+                    altera(notaRecebida);
             }
         }
     }
 
-    private void altera(Nota nota, int posicao) {
-        adapter.altera(posicao, nota);
+    private void altera(Nota nota) {
+        adapter.altera(nota);
     }
 
     private boolean ehResultadoInsereNota(int requestCode, Intent data) {
@@ -199,17 +211,19 @@ public class ListaNotasActivity extends AppCompatActivity {
 
     private void configuraRecyclerView(int listViewOption) {
         RecyclerView listaNotas = findViewById(R.id.lista_notas_recyclerview);
-        StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(2, LinearLayoutManager.VERTICAL);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
 
         if (listViewOption == 0) {
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
             listaNotas.setLayoutManager(linearLayoutManager);
         } else {
+            StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
             listaNotas.setLayoutManager(staggeredGridLayoutManager); // set LayoutManager to RecyclerView
         }
 
+
         configuraAdapter(listaNotas);
         configuraItemTouchHelper(listaNotas);
+
     }
 
     private void configuraItemTouchHelper(RecyclerView listaNotas) {
@@ -228,6 +242,7 @@ public class ListaNotasActivity extends AppCompatActivity {
                 vaiParaFormularioNotaActivityAltera(nota);
             }
         });
+
     }
 
 }
