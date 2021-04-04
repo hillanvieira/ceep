@@ -19,7 +19,7 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.launch_screen);
 
-        SharedPreferences sharedPref = SplashActivity.this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = this.getSharedPreferences("br.com.alura.ceep",Context.MODE_PRIVATE);
         final SharedPreferences.Editor editor = sharedPref.edit();
         final int delay = sharedPref.getInt("delaySplashScreen", 2000);
 

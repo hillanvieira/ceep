@@ -20,25 +20,22 @@ import br.com.alura.ceep.ui.recyclerview.adapter.PicColorAdapter;
 import br.com.alura.ceep.ui.recyclerview.adapter.listener.OnItemClickListener;
 
 import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.CHAVE_NOTA;
-import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.CHAVE_POSICAO;
-import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.POSICAO_INVALIDA;
 
 
 public class FormularioNotaActivity extends AppCompatActivity implements OnItemClickListener {
 
-
     static final String STATE_BACKGROUND = "Background color";
     public static final String TITULO_APPBAR_INSERE = "Insere nota";
     public static final String TITULO_APPBAR_ALTERA = "Altera nota";
-    private int posicaoRecibida = POSICAO_INVALIDA;
     RecyclerView listPicColor;
     private EditText titulo;
     private EditText descricao;
     private PicColorAdapter adapter;
     private ConstraintLayout constraintLayout;
     private int backGroundColor;
-    private int uid;
+    private String uid;
     private int position;
+
 
 
     @Override
@@ -59,11 +56,10 @@ public class FormularioNotaActivity extends AppCompatActivity implements OnItemC
         }
 
         Intent dadosRecebidos = getIntent();
-        if(dadosRecebidos.hasExtra(CHAVE_NOTA)){
+        if (dadosRecebidos.hasExtra(CHAVE_NOTA)) {
             setTitle(TITULO_APPBAR_ALTERA);
             Nota notaRecebida = (Nota) dadosRecebidos
                     .getSerializableExtra(CHAVE_NOTA);
-            posicaoRecibida = dadosRecebidos.getIntExtra(CHAVE_POSICAO, POSICAO_INVALIDA);
             preencheCampos(notaRecebida);
         }
 
@@ -82,8 +78,12 @@ public class FormularioNotaActivity extends AppCompatActivity implements OnItemC
     }
 
     private void preencheCampos(Nota notaRecebida) {
-       titulo.setText(notaRecebida.titulo);
-       descricao.setText(notaRecebida.descricao);
+        titulo.setText(notaRecebida.titulo);
+        descricao.setText(notaRecebida.descricao);
+        constraintLayout.setBackgroundColor(notaRecebida.color);
+        backGroundColor = notaRecebida.color;
+        uid = notaRecebida.uid;
+        position = notaRecebida.position;
     }
 
     @Override
@@ -112,13 +112,19 @@ public class FormularioNotaActivity extends AppCompatActivity implements OnItemC
     private void retornaNota(Nota nota) {
         Intent resultadoInsercao = new Intent();
         resultadoInsercao.putExtra(CHAVE_NOTA, nota);
-        resultadoInsercao.putExtra(CHAVE_POSICAO, posicaoRecibida);
-        setResult(Activity.RESULT_OK,resultadoInsercao);
+        setResult(Activity.RESULT_OK, resultadoInsercao);
     }
 
     private Nota criaNota() {
-        return new Nota(titulo.getText().toString(),
-                descricao.getText().toString(), backGroundColor, 0);
+
+        if (this.getTitle().equals(TITULO_APPBAR_INSERE)) {
+            return new Nota(titulo.getText().toString(),
+                    descricao.getText().toString(), backGroundColor, 0);
+        } else {
+            return new Nota(uid,titulo.getText().toString(),
+                    descricao.getText().toString(), backGroundColor, position);
+        }
+
     }
 
     private boolean ehMenuSalvaNota(MenuItem item) {
@@ -130,6 +136,5 @@ public class FormularioNotaActivity extends AppCompatActivity implements OnItemC
         backGroundColor = adapter.cor(CoresEnum.values()[position]);
         constraintLayout.setBackgroundColor(backGroundColor);
     }
-
 
 }

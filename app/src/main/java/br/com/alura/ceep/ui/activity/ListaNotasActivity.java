@@ -14,9 +14,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.room.Room;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.TextView;
 
 import br.com.alura.ceep.R;
@@ -36,23 +36,28 @@ public class ListaNotasActivity extends AppCompatActivity {
     private Menu optionsMenu;
     private ListaNotasAdapter adapter;
     private CeepDatabase db;
-    private int listViewOption;
-    private SharedPreferences sharedPref;
 
     public static final String TITULO_APPBAR = "Notas";
+
+    @Override
+    public void onBackPressed() {
+        Intent a = new Intent(Intent.ACTION_MAIN);
+        a.addCategory(Intent.CATEGORY_HOME);
+        a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(a);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_lista, menu);
         optionsMenu = menu;
-        setListOrGrid();
+        menuItemInit();
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        listViewOption = sharedPref.getInt("ListViewOption", 0);
-        setListOrGrid();
+        toggleListOrGrid();
         return super.onOptionsItemSelected(item);
 //        switch (item.getItemId()) {
 //            case R.id.list_ic:
@@ -62,24 +67,6 @@ public class ListaNotasActivity extends AppCompatActivity {
 //        }
     }
 
-    public void setListOrGrid() {
-
-        SharedPreferences.Editor editor = sharedPref.edit();
-
-        if (listViewOption == 0) {
-            optionsMenu.findItem(R.id.list_ic).setVisible(false);
-            optionsMenu.findItem(R.id.grid_ic).setVisible(true);
-            editor.putInt("ListViewOption", 1);
-            editor.commit();
-            configuraRecyclerView(listViewOption);
-        } else {
-            optionsMenu.findItem(R.id.grid_ic).setVisible(false);
-            optionsMenu.findItem(R.id.list_ic).setVisible(true);
-            editor.putInt("ListViewOption", 0);
-            editor.commit();
-            configuraRecyclerView(listViewOption);
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,25 +75,54 @@ public class ListaNotasActivity extends AppCompatActivity {
 
         setTitle(TITULO_APPBAR);
 
-        sharedPref = ListaNotasActivity.this.getPreferences(Context.MODE_PRIVATE);
-        listViewOption = sharedPref.getInt("ListViewOption", 0);
-
         db = Room.databaseBuilder(getApplicationContext(),
                 CeepDatabase.class, "database-ceep").allowMainThreadQueries().build();
 
-        configuraRecyclerView(listViewOption);
+
         configuraBotaoInsereNota();
 
     }
 
+    private void toggleListOrGrid() {
+        SharedPreferences sharedPref = this.getSharedPreferences("br.com.alura.ceep", Context.MODE_PRIVATE);
+        int listViewOption;
+        listViewOption = sharedPref.getInt("ListViewOption", 0);
+        SharedPreferences.Editor editor = sharedPref.edit();
+
+        if (listViewOption == 0) {
+            optionsMenu.findItem(R.id.list_ic).setVisible(true);
+            optionsMenu.findItem(R.id.grid_ic).setVisible(false);
+            editor.putInt("ListViewOption", 1);
+        } else if (listViewOption == 1) {
+            optionsMenu.findItem(R.id.grid_ic).setVisible(true);
+            optionsMenu.findItem(R.id.list_ic).setVisible(false);
+            editor.putInt("ListViewOption", 0);
+        }
+
+        editor.commit();
+        listViewOption = sharedPref.getInt("ListViewOption", 0);
+        configuraRecyclerView(listViewOption);
+    }
+
+    private void menuItemInit() {
+        SharedPreferences sharedPref = this.getSharedPreferences("br.com.alura.ceep", Context.MODE_PRIVATE);
+        int listViewOption = sharedPref.getInt("ListViewOption", 0);
+
+        if (listViewOption == 0) {
+            optionsMenu.findItem(R.id.list_ic).setVisible(false);
+            optionsMenu.findItem(R.id.grid_ic).setVisible(true);
+            configuraRecyclerView(0);
+        } else if (listViewOption == 1) {
+            optionsMenu.findItem(R.id.grid_ic).setVisible(false);
+            optionsMenu.findItem(R.id.list_ic).setVisible(true);
+            configuraRecyclerView(1);
+        }
+    }
+
+
     private void configuraBotaoInsereNota() {
         TextView botaoInsereNota = findViewById(R.id.lista_notas_insere_nota);
-        botaoInsereNota.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                vaiParaFormularioNotaActivityInsere();
-            }
-        });
+        botaoInsereNota.setOnClickListener(view -> vaiParaFormularioNotaActivityInsere());
     }
 
     private void vaiParaFormularioNotaActivityInsere() {
@@ -117,44 +133,38 @@ public class ListaNotasActivity extends AppCompatActivity {
                 CODIGO_REQUISICAO_INSERE_NOTA);
     }
 
-    private void vaiParaFormularioNotaActivityAltera(Nota nota, int posicao) {
+    private void vaiParaFormularioNotaActivityAltera(Nota nota) {
         Intent abreFormularioComNota = new Intent(ListaNotasActivity.this,
                 FormularioNotaActivity.class);
         abreFormularioComNota.putExtra(CHAVE_NOTA, nota);
-        abreFormularioComNota.putExtra(CHAVE_POSICAO, posicao);
         startActivityForResult(abreFormularioComNota, CODIGO_REQUISICAO_ALTERA_NOTA);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
+        Log.d("REQUEST ACTIVITY RESULT", ""+requestCode+"  "+data+" "+requestCode);
+
         if (ehResultadoInsereNota(requestCode, data)) {
 
             if (resultadoOk(resultCode)) {
                 Nota notaRecebida = (Nota) data.getSerializableExtra(CHAVE_NOTA);
                 adiciona(notaRecebida);
             }
-
         }
 
         if (ehResultadoAlteraNota(requestCode, data)) {
             if (resultadoOk(resultCode)) {
                 Nota notaRecebida = (Nota) data.getSerializableExtra(CHAVE_NOTA);
                 int posicaoRecebida = data.getIntExtra(CHAVE_POSICAO, POSICAO_INVALIDA);
-                if (ehPosicaoValida(posicaoRecebida)) {
                     altera(notaRecebida, posicaoRecebida);
-                }
             }
         }
     }
 
     private void altera(Nota nota, int posicao) {
-        //new NotaDAO().altera(posicao, nota);
         adapter.altera(posicao, nota);
-    }
-
-    private boolean ehPosicaoValida(int posicaoRecebida) {
-        return posicaoRecebida > POSICAO_INVALIDA;
     }
 
     private boolean ehResultadoInsereNota(int requestCode, Intent data) {
@@ -165,7 +175,6 @@ public class ListaNotasActivity extends AppCompatActivity {
     private boolean resultadoOk(int resultCode) {
         return resultCode == Activity.RESULT_OK;
     }
-
 
     private boolean ehResultadoAlteraNota(int requestCode, Intent data) {
         return ehCodigoRequisicaoAlteraNota(requestCode) &&
@@ -215,8 +224,8 @@ public class ListaNotasActivity extends AppCompatActivity {
         adapter.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(int posicao) {
-                Nota nota = db.notaDao().getAll().get(posicao);
-                vaiParaFormularioNotaActivityAltera(nota, posicao);
+                Nota nota = db.notaDao().findByPosition(posicao);
+                vaiParaFormularioNotaActivityAltera(nota);
             }
         });
     }

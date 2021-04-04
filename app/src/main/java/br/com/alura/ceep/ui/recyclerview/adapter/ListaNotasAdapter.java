@@ -5,6 +5,7 @@ import android.content.Context;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,8 +45,17 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
 
     @Override
     public void onBindViewHolder(ListaNotasAdapter.NotaViewHolder holder, int position) {
-        Nota nota = notas.get(position);
-        holder.vincula(nota);
+
+        for (Nota nota : notas) {
+            if(nota.position == position){
+                holder.vincula(nota);
+                break;
+            }
+        }
+
+//        Nota nota = notas.get(position);
+//        holder.vincula(nota);
+
     }
 
     @Override
@@ -54,18 +64,35 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
     }
 
     public void altera(int posicao, Nota nota) {
-        notas.set(posicao, nota);
+        notas.set(nota.position, nota);
+        db.notaDao().update(nota);
+        Log.i("UPDATE NOTA", nota.toString());
         notifyDataSetChanged();
     }
 
     public void remove(int posicao) {
+
+        db.notaDao().delete(notas.get(posicao));
         notas.remove(posicao);
+
+        for(int i = 0; i < notas.size(); i++){
+           notas.get(i).position = i;
+            db.notaDao().update(notas.get(i));
+        }
+
         notifyItemRemoved(posicao);
     }
 
     public void troca(int posicaoInicial, int posicaoFinal) {
+
+        notas.get(posicaoInicial).position = posicaoFinal;
+        notas.get(posicaoFinal).position = posicaoInicial;
+        db.notaDao().update(notas.get(posicaoInicial),notas.get(posicaoFinal));
+
         Collections.swap(notas, posicaoInicial, posicaoFinal);
         notifyItemMoved(posicaoInicial, posicaoFinal);
+
+        Log.i("TROCA NOTA", notas.get(posicaoInicial).toString());
     }
 
     class NotaViewHolder extends RecyclerView.ViewHolder {
@@ -100,11 +127,16 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
     }
 
     public void adiciona(Nota nota) {
+
+        nota.position = notas.size();
         try {
             db.notaDao().insertAll(nota);
+            notas = db.notaDao().getAll();
+            Log.i("SALVA NOTA", nota.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         notifyDataSetChanged();
     }
 
