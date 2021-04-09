@@ -2,15 +2,18 @@ package br.com.alura.ceep.ui.recyclerview.adapter;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -24,12 +27,20 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
     private final Context context;
     private CeepDatabase db;
     private OnItemClickListener onItemClickListener;
-    private List<Nota> notas;
+    private ArrayList<Nota> notas = new ArrayList<>(0);
 
-    public ListaNotasAdapter(Context context, CeepDatabase db) {
+    public ListaNotasAdapter(Context context, @NonNull CeepDatabase db) {
         this.context = context;
         this.db = db;
-        this.notas = db.notaDao().getAll();
+        List<Nota> sourceNotasDB = db.notaDao().getAll();
+
+        for (int i = 0; i < sourceNotasDB.size(); i++) {
+            for (Nota nota : sourceNotasDB) {
+                if (nota.position == i) {
+                    this.notas.add(nota);
+                }
+            }
+        }
     }
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
@@ -45,18 +56,8 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
 
     @Override
     public void onBindViewHolder(ListaNotasAdapter.NotaViewHolder holder, int position) {
-
-        int rPosition = getItemCount() - position - 1;
-        //Loop que organiza as notas conforme as posisoes salvas nelas
-        for (Nota nota : notas) {
-            if (nota.position == rPosition) {
-                holder.vincula(nota);
-            }
-        }
-
-//        Nota nota = notas.get(position);
-//        holder.vincula(nota);
-
+        Nota nota = notas.get(position);
+        holder.vincula(nota);
     }
 
     @Override
@@ -65,52 +66,41 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
     }
 
     public void altera(Nota nota) {
-
         notas.set(nota.position, nota);
         db.notaDao().update(nota);
         Log.i("UPDATE_NOTA", nota.toString());
-        notifyDataSetChanged();
-
+        notifyItemChanged(nota.position);
     }
 
     public void remove(int position) {
-
-        int rPosition = getItemCount() - position - 1;
-        int notePosition = notas.get(rPosition).position;
-
-        Log.i("REMOVE_NOTA", "position Adapter: " + position + " title: " + notas.get(rPosition).titulo + " position on note: " + notas.get(rPosition).position);
-
-        notas.remove(rPosition);
-        notifyItemRemoved(position);
-
-        db.notaDao().deleteByPosition(notePosition);
-
+        notas.remove(position);
+        db.notaDao().deleteByPosition(position);
         for (Nota nota : notas) {
-            if(nota.position > notePosition){
+            if (nota.position > position) {
                 nota.position -= 1;
                 db.notaDao().update(nota);
             }
         }
-        notas = db.notaDao().getAll();
-
-      // notifyDataSetChanged();
-
+        notifyItemRemoved(position);
     }
 
     public void troca(int posicaoInicial, int posicaoFinal) {
-//
-//        notas.get(posicaoInicial).position = posicaoFinal;
-//        notas.get(posicaoFinal).position = posicaoInicial;
-//        db.notaDao().update(notas.get(posicaoInicial),notas.get(posicaoFinal));
-//
-//        Collections.swap(notas, posicaoInicial, posicaoFinal);
-//        notifyItemMoved(posicaoInicial, posicaoFinal);
-//
-//        Log.i("TROCA NOTA", notas.get(posicaoInicial).toString());
+
+        int notePosicaoInicial = notas.get(posicaoInicial).position;
+        int notePosicaoFinal = notas.get(posicaoFinal).position;
+
+        notas.get(posicaoInicial).position = notePosicaoFinal;
+        notas.get(posicaoFinal).position = notePosicaoInicial;
+
+        db.notaDao().update(notas.get(posicaoInicial));
+        db.notaDao().update(notas.get(posicaoFinal));
+
+
+        Collections.swap(notas, posicaoInicial, posicaoFinal);
+        notifyItemMoved(posicaoInicial, posicaoFinal);
     }
 
     class NotaViewHolder extends RecyclerView.ViewHolder {
-
         private final TextView titulo;
         private final TextView descricao;
         private final ConstraintLayout constraintLayout;
@@ -124,8 +114,7 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    int rAdpterPosition = getItemCount() - getAdapterPosition() - 1;
-                    onItemClickListener.onItemClick(rAdpterPosition);
+                    onItemClickListener.onItemClick(getAdapterPosition());
                 }
             });
         }
@@ -142,16 +131,16 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
     }
 
     public void adiciona(Nota nota) {
+        notas.add(0,nota);
+        db.notaDao().insertAll(nota);
 
-        notas = db.notaDao().getAll();
-        nota.position = notas.size();
-
-        if (db.notaDao().findByPosition(nota.position) == null) {
-            db.notaDao().insertAll(nota);
-            notas = db.notaDao().getAll();
-            Log.i("SALVA NOTA", nota.toString());
+        for(int i = 0; i < getItemCount(); i++){
+            notas.get(i).position = i;
+            db.notaDao().update(notas.get(i));
         }
 
-        notifyDataSetChanged();
+        notifyItemInserted(0);
     }
 }
+
+

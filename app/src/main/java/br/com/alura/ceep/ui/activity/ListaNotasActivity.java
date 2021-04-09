@@ -27,10 +27,8 @@ import br.com.alura.ceep.ui.recyclerview.adapter.listener.OnItemClickListener;
 import br.com.alura.ceep.ui.recyclerview.helper.callback.NotaItemTouchHelperCallback;
 
 import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.CHAVE_NOTA;
-import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.CHAVE_POSICAO;
 import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.CODIGO_REQUISICAO_ALTERA_NOTA;
 import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.CODIGO_REQUISICAO_INSERE_NOTA;
-import static br.com.alura.ceep.ui.activity.NotaActivityConstantes.POSICAO_INVALIDA;
 
 public class ListaNotasActivity extends AppCompatActivity {
     private Menu optionsMenu;
@@ -72,12 +70,10 @@ public class ListaNotasActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_notas);
-
         setTitle(TITULO_APPBAR);
 
         db = Room.databaseBuilder(getApplicationContext(),
                 CeepDatabase.class, "database-ceep").allowMainThreadQueries().build();
-
 
         configuraBotaoInsereNota();
 
@@ -157,7 +153,7 @@ public class ListaNotasActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        Log.d("REQUEST ACTIVITY RESULT", ""+requestCode+"  "+data+" "+requestCode);
+        Log.d("REQUEST ACTIVITY RESULT", "" + requestCode + "  " + data + " " + requestCode);
 
         if (ehResultadoInsereNota(requestCode, data)) {
 
@@ -170,7 +166,7 @@ public class ListaNotasActivity extends AppCompatActivity {
         if (ehResultadoAlteraNota(requestCode, data)) {
             if (resultadoOk(resultCode)) {
                 Nota notaRecebida = (Nota) data.getSerializableExtra(CHAVE_NOTA);
-                    altera(notaRecebida);
+                altera(notaRecebida);
             }
         }
     }
@@ -238,7 +234,9 @@ public class ListaNotasActivity extends AppCompatActivity {
         adapter.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(int posicao) {
+
                 Nota nota = db.notaDao().findByPosition(posicao);
+
                 vaiParaFormularioNotaActivityAltera(nota);
             }
         });

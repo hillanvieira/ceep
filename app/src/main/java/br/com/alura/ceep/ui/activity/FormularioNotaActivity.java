@@ -27,7 +27,7 @@ public class FormularioNotaActivity extends AppCompatActivity implements OnItemC
     static final String STATE_BACKGROUND = "Background color";
     public static final String TITULO_APPBAR_INSERE = "Insere nota";
     public static final String TITULO_APPBAR_ALTERA = "Altera nota";
-    RecyclerView listPicColor;
+    private RecyclerView listPicColor;
     private EditText titulo;
     private EditText descricao;
     private PicColorAdapter adapter;
