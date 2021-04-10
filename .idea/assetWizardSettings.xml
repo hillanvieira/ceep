@@ -24,7 +24,7 @@
                                             <option name="values">
                                               <map>
                                                 <entry key="color" value="000000" />
-                                                <entry key="imagePath" value="C:\Users\WORKSHOP\AppData\Local\Temp\baseline_remove_circle_24.xml" />
+                                                <entry key="imagePath" value="C:\Users\WORKSHOP\AppData\Local\Temp\baseline_send_24.xml" />
                                                 <entry key="opacityPercent" value="80" />
                                               </map>
                                             </option>
@@ -36,7 +36,7 @@
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="url" value="file:/$USER_HOME$/AppData/Local/Android/Sdk/icons/material/materialicons/remove_circle/baseline_remove_circle_24.xml" />
+                                                <entry key="url" value="file:/$USER_HOME$/AppData/Local/Android/Sdk/icons/material/materialicons/send/baseline_send_24.xml" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -82,7 +82,7 @@
                                   </option>
                                   <option name="values">
                                     <map>
-                                      <entry key="outputName" value="ic_pic_color" />
+                                      <entry key="outputName" value="send_icon" />
                                       <entry key="theme" value="CUSTOM" />
                                       <entry key="themeColor" value="ffffff" />
                                     </map>
@@ -112,7 +112,7 @@
                                             <option name="values">
                                               <map>
                                                 <entry key="color" value="000000" />
-                                                <entry key="imagePath" value="C:\Users\WORKSHOP\Desktop\formacao-android-feature-3-resources\ceep-icon-android.png" />
+                                                <entry key="imagePath" value="C:\Users\WORKSHOP\StudioProjects\ceep\app\src\main\ic_launcher-playstore.png" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -308,6 +308,11 @@
                                 </PersistentState>
                               </value>
                             </entry>
+                          </map>
+                        </option>
+                        <option name="values">
+                          <map>
+                            <entry key="outputIconType" value="ACTIONBAR" />
                           </map>
                         </option>
                       </PersistentState>

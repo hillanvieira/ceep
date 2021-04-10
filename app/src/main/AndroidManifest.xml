@@ -20,6 +20,8 @@
         </activity>
         <activity android:name=".ui.activity.ListaNotasActivity" />
         <activity android:name=".ui.activity.FormularioNotaActivity" />
+        <activity android:name=".ui.activity.FormularioFeedBackActivity" />
+
     </application>
 
 </manifest>

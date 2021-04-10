@@ -16,5 +16,10 @@
         android:visible="false"
         app:showAsAction="always"/>
 
+    <item
+        android:id="@+id/feed_back_ic"
+        android:title="Feed Back"
+        android:icon="@drawable/feed_back_icon"
+        app:showAsAction="always"/>
 
 </menu>

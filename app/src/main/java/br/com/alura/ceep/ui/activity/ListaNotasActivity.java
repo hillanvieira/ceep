@@ -55,14 +55,27 @@ public class ListaNotasActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        toggleListOrGrid();
+        // toggleListOrGrid();
+
+        switch (item.getItemId()) {
+            case R.id.list_ic:
+            case R.id.grid_ic:
+                toggleListOrGrid();
+                break;
+            case R.id.feed_back_ic:
+
+                Intent intent =
+                        new Intent(this,
+                                FormularioFeedBackActivity.class);
+                startActivity(intent);
+
+                Log.i("FEEDBACK", "Clicked");
+                break;
+        }
+
         return super.onOptionsItemSelected(item);
-//        switch (item.getItemId()) {
-//            case R.id.list_ic:
-//              break;
-//            case R.id.grid_ic:
-//              break;
-//        }
+
+
     }
 
 
